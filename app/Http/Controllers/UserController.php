@@ -7,26 +7,28 @@ use Illuminate\Http\Request;
 use App\Models\User;
 use Illuminate\Support\Facades\Hash;
 
+
 class UserController extends Controller
 {
     // Mostrar el dashboard según el rol del usuario
     public function dashboard()
-    {
-        $users = User::all(); // Cargar todos los usuarios para la vista del gerente
-        return view('gerente', compact('users'));
-    }
+{
+    $users = User::all(); 
+    return view('gerente', compact('users'));
+}
+
 
     // Mostrar todos los usuarios
     public function index()
     {
-        $users = User::paginate(10); // Paginación para evitar carga excesiva
-        return view('usuarios.index', compact('users'));
+        $users = User::all(); 
+        return view('gerente', compact('users'));
     }
 
     // Mostrar formulario para crear un nuevo usuario
     public function create()
     {
-        return view('usuarios.create');
+        return view('create');
     }
 
     // Guardar un nuevo usuario
@@ -46,14 +48,13 @@ class UserController extends Controller
             'role' => $validated['role'],
         ]);
 
-        // Redirigir a la lista de usuarios con un mensaje de éxito
         return redirect()->route('gerente.usuarios.index')->with('success', 'Usuario creado con éxito.');
     }
 
     // Mostrar formulario para editar un usuario
     public function edit(User $user)
     {
-        return view('usuarios.edit', compact('user'));
+        return view('edit', compact('user'));
     }
 
     // Actualizar un usuario
@@ -73,7 +74,6 @@ class UserController extends Controller
             'role' => $validated['role'],
         ]);
 
-        // Redirigir a la lista de usuarios con un mensaje de éxito
         return redirect()->route('gerente.usuarios.index')->with('success', 'Usuario actualizado con éxito.');
     }
 
@@ -81,6 +81,6 @@ class UserController extends Controller
     public function destroy(User $user)
     {
         $user->delete();
-        // Redir
+        return redirect()->route('gerente.usuarios.index')->with('success', 'Usuario eliminado con éxito.');
     }
 }
