@@ -4,6 +4,15 @@ namespace App\Providers;
 
 use Illuminate\Foundation\Support\Providers\AuthServiceProvider as ServiceProvider;
 use Illuminate\Support\Facades\Gate;
+use App\Models\User;
+use App\Models\Producto;
+use App\Models\Categoria;
+use App\Models\Pedido;
+
+use App\Policies\UserPolicy;
+use App\Policies\ProductoPolicy;
+use App\Policies\CategoriaPolicy;
+use App\Policies\PedidoPolicy;
 
 class AuthServiceProvider extends ServiceProvider
 {
@@ -13,20 +22,21 @@ class AuthServiceProvider extends ServiceProvider
      * @var array
      */
     protected $policies = [
-        // 'App\Models\Model' => 'App\Policies\ModelPolicy',
+        User::class => UserPolicy::class,
+        Producto::class => ProductoPolicy::class,
+        Categoria::class => CategoriaPolicy::class,
+        Pedido::class => PedidoPolicy::class,
+
     ];
 
-    /**
-     * Register any authentication / authorization services.
-     */
+
     public function boot(): void
     {
         $this->registerPolicies();
 
-        // Definir el Gate para el acceso de gerente
+    
         Gate::define('manage-users', function ($user) {
             return $user->role === 'gerente';
         });
     }
 }
-
