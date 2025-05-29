@@ -2,85 +2,96 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Http\Request;
 use App\Models\User;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
-
 
 class UserController extends Controller
 {
-    // Mostrar el dashboard según el rol del usuario
-    public function dashboard()
+    // ADMIN: dashboard general
+    public function dashboardAdmin()
 {
-    $users = User::all(); 
-    return view('gerente', compact('users'));
+    $totalUsuarios = User::count();
+    $gerentes = User::where('role', 'Gerente')->count();
+    $clientes = User::where('role', 'Cliente')->count();
+    $usuarios = User::all();
+
+    $gerentesPorcentaje = $totalUsuarios > 0 ? round(($gerentes / $totalUsuarios) * 100, 2) : 0;
+    $clientesPorcentaje = $totalUsuarios > 0 ? round(($clientes / $totalUsuarios) * 100, 2) : 0;
+
+    return view('admin.dashboard', compact(
+        'totalUsuarios',
+        'gerentes',
+        'clientes',
+        'gerentesPorcentaje',
+        'clientesPorcentaje',
+        'usuarios'
+    ));
 }
 
 
-    // Mostrar todos los usuarios
-    public function index()
+    // GERENTE: dashboard con estadísticas
+    public function dashboardGerente()
     {
-        $users = User::all(); 
-        return view('gerente', compact('users'));
+        $totalUsuarios = User::count();
+        return view('gerente.dashboard', compact('totalUsuarios'));
     }
 
-    // Mostrar formulario para crear un nuevo usuario
-    public function create()
+    // --- ADMIN: CRUD de usuarios (separado del gerente) ---
+
+    public function indexAdmin()
     {
-        return view('create');
+        $usuarios = User::all();
+        return view('admin.index', compact('usuarios'));
     }
 
-    // Guardar un nuevo usuario
-    public function store(Request $request)
+    public function createAdmin()
     {
-        $validated = $request->validate([
+        return view('admin.create');
+    }
+
+    public function storeAdmin(Request $request)
+    {
+        $request->validate([
             'name' => 'required|string|max:255',
-            'email' => 'required|string|email|max:255|unique:users',
+            'email' => 'required|email|unique:users',
             'password' => 'required|string|min:8|confirmed',
-            'role' => 'required|string|in:gerente,empleado,cliente',
+            'role' => 'required|in:Administrador,Gerente,Empleado,Cliente' // admin puede asignar más roles
         ]);
 
         User::create([
-            'name' => $validated['name'],
-            'email' => $validated['email'],
-            'password' => Hash::make($validated['password']),
-            'role' => $validated['role'],
+            'name' => $request->name,
+            'email' => $request->email,
+            'password' => Hash::make($request->password),
+            'role' => $request->role,
         ]);
 
-        return redirect()->route('gerente.usuarios.index')->with('success', 'Usuario creado con éxito.');
+        return redirect()->route('admin.index')->with('success', 'Usuario creado correctamente');
     }
 
-    // Mostrar formulario para editar un usuario
-    public function edit(User $user)
+    public function editAdmin(User $user)
     {
-        return view('edit', compact('user'));
+        return view('admin.edit', compact('user'));
     }
 
-    // Actualizar un usuario
-    public function update(Request $request, User $user)
+    public function updateAdmin(Request $request, User $user)
     {
-        $validated = $request->validate([
+        $request->validate([
             'name' => 'required|string|max:255',
-            'email' => 'required|string|email|max:255|unique:users,email,' . $user->id,
-            'password' => 'nullable|string|min:8|confirmed',
-            'role' => 'required|string|in:gerente,empleado,cliente',
+            'email' => 'required|email|unique:users,email,' . $user->id,
+            'role' => 'required|in:Administrador,Gerente,Empleado,Cliente'
         ]);
 
-        $user->update([
-            'name' => $validated['name'],
-            'email' => $validated['email'],
-            'password' => $validated['password'] ? Hash::make($validated['password']) : $user->password,
-            'role' => $validated['role'],
-        ]);
+        $user->update($request->only(['name', 'email', 'role']));
 
-        return redirect()->route('gerente.usuarios.index')->with('success', 'Usuario actualizado con éxito.');
+        return redirect()->route('admin.index')->with('success', 'Usuario actualizado correctamente');
     }
 
-    // Eliminar un usuario
-    public function destroy(User $user)
+    public function destroyAdmin(User $user)
     {
         $user->delete();
-        return redirect()->route('gerente.usuarios.index')->with('success', 'Usuario eliminado con éxito.');
+
+        return redirect()->route('admin.index')->with('success', 'Usuario eliminado correctamente');
     }
+
 }

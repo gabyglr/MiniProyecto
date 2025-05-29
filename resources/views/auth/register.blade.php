@@ -89,6 +89,37 @@
                 </div>
             </div>
 
+            <!-- Tipo de Usuario -->
+            <div class="space-y-2">
+                <label class="block text-sm font-medium text-gray-700">
+                    Tipo de usuario
+                </label>
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="relative">
+                        <input type="radio" id="vendedor" name="user_type" value="vendedor" required
+                            class="peer absolute opacity-0 w-full h-full cursor-pointer">
+                        <label for="vendedor" 
+                            class="block p-4 text-center border rounded-lg cursor-pointer transition-all peer-checked:border-indigo-500 peer-checked:bg-indigo-50 peer-checked:text-indigo-600 hover:border-indigo-200">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mx-auto mb-2" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M20 7h-7m7 10h-7m-4-3L6 7m0 7l3-3"/>
+                            </svg>
+                            <span class="font-medium">Vendedor</span>
+                        </label>
+                    </div>
+                    <div class="relative">
+                        <input type="radio" id="comprador" name="user_type" value="comprador" required
+                            class="peer absolute opacity-0 w-full h-full cursor-pointer">
+                        <label for="comprador"
+                            class="block p-4 text-center border rounded-lg cursor-pointer transition-all peer-checked:border-indigo-500 peer-checked:bg-indigo-50 peer-checked:text-indigo-600 hover:border-indigo-200">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mx-auto mb-2" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"/>
+                            </svg>
+                            <span class="font-medium">Comprador</span>
+                        </label>
+                    </div>
+                </div>
+            </div>
+
             <div class="space-y-2">
                 <label for="password" class="block text-sm font-medium text-gray-700">
                     Contraseña

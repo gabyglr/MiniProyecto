@@ -21,16 +21,44 @@ class UserFactory extends Factory
      *
      * @return array<string, mixed>
      */
-    public function definition(): array
-    {
-        return [
-            'name' => fake()->name(),
-            'email' => fake()->unique()->safeEmail(),
-            'email_verified_at' => now(),
-            'password' => static::$password ??= Hash::make('password'),
-            'remember_token' => Str::random(10),
-        ];
-    }
+    // Dentro de UserFactory.php
+
+public function definition(): array
+{
+    return [
+        'name' => fake()->name(),
+        'email' => fake()->unique()->safeEmail(),
+        'email_verified_at' => now(),
+        'password' => static::$password ??= Hash::make('password'),
+        'role' => $this->faker->randomElement(['Administrador', 'Gerente', 'Cliente']),
+        // Agregamos 'tipo_cliente' para los clientes, null para otros roles
+        'tipo_cliente' => null,
+        'remember_token' => Str::random(10),
+    ];
+}
+
+/**
+ * Estado para Cliente comprador
+ */
+public function comprador(): static
+{
+    return $this->state(fn (array $attributes) => [
+        'role' => 'Cliente',
+        'tipo_cliente' => 'Comprador',
+    ]);
+}
+
+/**
+ * Estado para Cliente vendedor
+ */
+public function vendedor(): static
+{
+    return $this->state(fn (array $attributes) => [
+        'role' => 'Cliente',
+        'tipo_cliente' => 'Vendedor',
+    ]);
+}
+
 
     /**
      * Indicate that the model's email address should be unverified.

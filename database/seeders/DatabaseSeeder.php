@@ -21,7 +21,6 @@ class DatabaseSeeder extends Seeder
         UserSeeder::class,
     ]);
 
-    \App\Models\Pedido::factory(20)->create();
 }
 
 }

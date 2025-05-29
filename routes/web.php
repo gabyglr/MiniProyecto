@@ -1,58 +1,66 @@
 <?php
 
-use App\Http\Controllers\ProfileController;
-use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
+use App\Http\Controllers\UserController;
+use App\Http\Controllers\VentaController;
+use App\Http\Controllers\ProfileController;
 
+// Página de bienvenida
 Route::get('/', function () {
     return view('welcome');
 });
 
-// Redireccionar según el rol del usuario
+// Redirección según el rol
 Route::middleware(['auth', 'verified'])->get('/dashboard', function () {
     $user = Auth::user();
 
     return match ($user->role) {
-        'gerente' => redirect()->route('gerente.dashboard'),
-        'empleado' => redirect()->route('empleado.dashboard'),
-        default => redirect()->route('cliente.dashboard'),
+        'Administrador' => redirect()->route('admin.dashboard'),
+        'Gerente' => redirect()->route('gerente.dashboard'),
+        'Cliente' => redirect()->route('cliente.dashboard'),
+        default => abort(403, 'Rol no permitido'),
     };
 })->name('dashboard');
 
-// Rutas de dashboards
-Route::middleware('auth')->group(function () {
-    Route::get('/empleado', function () {
-        return view('empleado');
-    })->name('empleado.dashboard');
-
-    Route::get('/cliente', function () {
-        return view('cliente');
-    })->name('cliente.dashboard');
-});
-
-// Rutas del perfil
+// 👤 Rutas de perfil
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
 
-// Rutas del gerente (usando el middleware de roles)
-Route::middleware(['auth', 'verified'])->prefix('gerente')->name('gerente.')->group(function () {
-    // Dashboard del gerente
-    Route::get('/', [UserController::class, 'dashboard'])->name('dashboard'); // Aquí hemos cambiado la ruta para apuntar correctamente a la vista 'gerente'
+// Rutas para admin - gestión completa de usuarios
+Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () {
+    Route::get('/', [UserController::class, 'dashboardAdmin'])->name('dashboard');
 
-    // Rutas CRUD de usuarios
-    Route::prefix('usuarios')->name('usuarios.')->group(function () {
-        Route::get('/', [UserController::class, 'index'])->name('index');
-        Route::get('/create', [UserController::class, 'create'])->name('create');
-        Route::post('/', [UserController::class, 'store'])->name('store');
-        Route::get('/{user}/edit', [UserController::class, 'edit'])->name('edit');
-        Route::put('/{user}', [UserController::class, 'update'])->name('update');
-        Route::delete('/{user}', [UserController::class, 'destroy'])->name('destroy');
-    });
+    // CRUD sin prefijo "usuarios"
+    Route::get('/index', [UserController::class, 'indexAdmin'])->name('index');
+    Route::get('/create', [UserController::class, 'createAdmin'])->name('create');
+    Route::post('/', [UserController::class, 'storeAdmin'])->name('store');
+    Route::get('/{user}/edit', [UserController::class, 'editAdmin'])->name('edit');
+    Route::put('/{user}', [UserController::class, 'updateAdmin'])->name('update');
+    Route::delete('/{user}', [UserController::class, 'destroyAdmin'])->name('destroy');
 });
 
-// Cargar las rutas de autenticación
+// Rutas para gerente
+Route::middleware(['auth'])->prefix('gerente')->name('gerente.')->group(function () {
+    Route::get('/', [UserController::class, 'dashboardGerente'])->name('dashboard');
+});
+
+// 🛍️ Dashboard del Cliente
+Route::middleware(['auth'])->prefix('cliente')->name('cliente.')->group(function () {
+    Route::get('/', function () {
+        return view('cliente');
+    })->name('dashboard');
+});
+
+// 💸 Rutas de ventas
+Route::middleware(['auth'])->group(function () {
+    Route::resource('ventas', VentaController::class);
+    Route::post('/ventas/{venta}/validar', [VentaController::class, 'validarVenta'])->name('ventas.validar');
+    Route::get('/ventas/{venta}/ticket', [VentaController::class, 'descargarTicket'])->name('ventas.ticket');
+});
+
+// 🧾 Rutas de autenticación Breeze
 require __DIR__.'/auth.php';
